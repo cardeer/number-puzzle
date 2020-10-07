@@ -1,0 +1,79 @@
+.puzzle {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.controls {
+  display: flex;
+  gap: 15px;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+.puzzle-render {
+  position: relative;
+  width: 70vmin;
+  height: 70vmin;
+  border: 3px solid #58595b;
+  margin-bottom: 20px;
+  user-select: none;
+}
+
+.lines,
+.numbers {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.line {
+  position: absolute;
+  background-color: #58595b;
+}
+
+.v-line {
+  width: 0.3vmin;
+  height: 100%;
+  transform: translateX(-50%);
+}
+
+.h-line {
+  height: 0.3vmin;
+  width: 100%;
+  transform: translateY(-50%);
+}
+
+.hide {
+  display: none !important;
+}
+
+.number {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.number-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 90%;
+  height: 90%;
+  background-color: #e98f38;
+  color: white;
+  font-weight: bold;
+  font-size: 3vmin;
+}
