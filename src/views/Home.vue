@@ -36,6 +36,8 @@
       </div>
     </div>
 
+    <p>{{ startedTime }}</p>
+
     <div class="controls">
       <button
         v-if="!state.started"
@@ -57,7 +59,7 @@
   <div class="options">
     <h3>Game settings</h3>
     <p>Size: {{ state.puzzleSize + " x " + state.puzzleSize }}</p>
-    <input v-model="state.puzzleSize" type="range" min="2" max="10" />
+    <input v-model="state.puzzleSize" type="range" min="3" max="10" />
   </div>
 </template>
 
@@ -71,21 +73,31 @@ export default {
     const state = reactive({
       puzzleSize: 4,
       started: false,
+      time: 0,
       map: [],
+      validPosition: {},
     });
 
     const square = computed(() => state.puzzleSize * state.puzzleSize);
+    const startedTime = computed(
+      () =>
+        `${("0" + Math.floor((state.time % 3600) / 60)).substr(-2)}:${(
+          "0" + Math.floor(state.time % 60)
+        ).substr(-2)}`
+    );
 
-    var empty = {
-      y: state.puzzleSize - 1,
-      x: state.puzzleSize - 1,
-    };
     const moveDirections = {
       37: { x: 1, y: 0 },
       38: { x: 0, y: 1 },
       39: { x: -1, y: 0 },
       40: { x: 0, y: -1 },
     };
+    var empty = {
+      y: state.puzzleSize - 1,
+      x: state.puzzleSize - 1,
+    };
+    var interval = 0;
+    var validCount = 0;
 
     function createMap() {
       const numbers = [...Array(square.value).keys()];
@@ -113,32 +125,57 @@ export default {
     }
 
     function start() {
+      state.validPosition = {};
+      validCount = 0;
+      state.time = 0;
+
       createMap();
+
       state.started = true;
+      interval = setInterval(() => state.time++, 1000);
     }
 
     function stop() {
       state.started = false;
+      clearInterval(interval);
     }
 
     function move(e) {
       if (moveDirections[e.keyCode] && state.started) {
         e.preventDefault();
         const direction = moveDirections[e.keyCode];
-        if (
-          state.map[empty.y + direction.y] &&
-          state.map[empty.y + direction.y][empty.x + direction.x]
-        ) {
-          state.map[empty.y][empty.x] =
-            state.map[empty.y + direction.y][empty.x + direction.x];
-          state.map[empty.y + direction.y][empty.x + direction.x] = 0;
+        const fromY = empty.y + direction.y;
+        const fromX = empty.x + direction.x;
+        const toY = empty.y;
+        const toX = empty.x;
+
+        if (state.map[fromY] && state.map[fromY][fromX]) {
+          const toNumber = toY * state.puzzleSize + toX + 1;
+          const fromNumber = state.map[fromY][fromX];
+
+          state.map[toY][toX] = state.map[fromY][fromX];
+          state.map[fromY][fromX] = 0;
           empty.y += direction.y;
           empty.x += direction.x;
+
+          if (fromNumber == toNumber) {
+            state.validPosition[toNumber] = true;
+            validCount++;
+          } else {
+            if (state.validPosition[fromNumber]) {
+              delete state.validPosition[fromNumber];
+              validCount--;
+            }
+          }
+
+          if (validCount == square.value - 1) {
+            stop();
+          }
         }
       }
 
       if (e.keyCode == 13) {
-        state.started = false;
+        stop();
       }
     }
 
@@ -148,6 +185,7 @@ export default {
 
     onBeforeUnmount(() => {
       window.removeEventListener("keydown", move);
+      clearInterval(interval);
     });
 
     watch(
@@ -160,7 +198,7 @@ export default {
       }
     );
 
-    return { state, start, stop };
+    return { state, startedTime, start, stop };
   },
 };
 </script>
