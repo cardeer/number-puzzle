@@ -100,28 +100,29 @@ export default {
     var validCount = 0;
 
     function createMap() {
-      const numbers = [...Array(square.value).keys()];
-      const data = [];
+      const tempMap = [];
 
       for (let i = 0; i < state.puzzleSize; i++) {
         const set = [];
         for (let j = 0; j < state.puzzleSize; j++) {
-          const randomIndex = Math.floor(Math.random() * numbers.length);
-          set.push(numbers[randomIndex]);
-
-          if (numbers[randomIndex] == 0) {
-            empty = {
-              y: i,
-              x: j,
-            };
-          }
-
-          numbers.splice(randomIndex, 1);
+          set.push(i * state.puzzleSize + j + 1);
         }
-        data.push(set);
+        tempMap.push(set);
       }
 
-      state.map = data;
+      tempMap[state.puzzleSize - 1][state.puzzleSize - 1] = 0;
+      state.map = tempMap;
+
+      empty = {
+        y: state.puzzleSize - 1,
+        x: state.puzzleSize - 1,
+      };
+
+      const moves = [37, 38, 39, 40];
+
+      for (let i = 0; i < 1000; i++) {
+        moveNumber(moves[Math.floor(Math.random() * moves.length)]);
+      }
     }
 
     function start() {
@@ -140,24 +141,23 @@ export default {
       clearInterval(interval);
     }
 
-    function move(e) {
-      if (moveDirections[e.keyCode] && state.started) {
-        e.preventDefault();
-        const direction = moveDirections[e.keyCode];
-        const fromY = empty.y + direction.y;
-        const fromX = empty.x + direction.x;
-        const toY = empty.y;
-        const toX = empty.x;
+    function moveNumber(code) {
+      const direction = moveDirections[code];
+      const fromY = empty.y + direction.y;
+      const fromX = empty.x + direction.x;
+      const toY = empty.y;
+      const toX = empty.x;
 
-        if (state.map[fromY] && state.map[fromY][fromX]) {
-          const toNumber = toY * state.puzzleSize + toX + 1;
-          const fromNumber = state.map[fromY][fromX];
+      if (state.map[fromY] && state.map[fromY][fromX]) {
+        const toNumber = toY * state.puzzleSize + toX + 1;
+        const fromNumber = state.map[fromY][fromX];
 
-          state.map[toY][toX] = state.map[fromY][fromX];
-          state.map[fromY][fromX] = 0;
-          empty.y += direction.y;
-          empty.x += direction.x;
+        state.map[toY][toX] = state.map[fromY][fromX];
+        state.map[fromY][fromX] = 0;
+        empty.y += direction.y;
+        empty.x += direction.x;
 
+        if (state.started) {
           if (fromNumber == toNumber) {
             state.validPosition[toNumber] = true;
             validCount++;
@@ -173,9 +173,12 @@ export default {
           }
         }
       }
+    }
 
-      if (e.keyCode == 13) {
-        stop();
+    function move(e) {
+      if (moveDirections[e.keyCode] && state.started) {
+        e.preventDefault();
+        moveNumber(e.keyCode);
       }
     }
 
