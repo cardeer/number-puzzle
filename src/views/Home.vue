@@ -29,6 +29,7 @@
               top: `${i * (100 / state.puzzleSize)}%`,
               left: `${j * (100 / state.puzzleSize)}%`,
             }"
+            @click="numberClick(i, j)"
           >
             <span class="number-preview">{{ number }}</span>
           </div>
@@ -175,6 +176,24 @@ export default {
       }
     }
 
+    function numberClick(i, j) {
+      if (!state.started) return;
+
+      if (empty.y == i) {
+        const direction = empty.x < j ? 37 : 39;
+        const dist = Math.abs(empty.x - j);
+        for (let moves = 0; moves < dist; moves++) {
+          moveNumber(direction);
+        }
+      } else if (empty.x == j) {
+        const direction = empty.y < i ? 38 : 40;
+        const dist = Math.abs(empty.y - i);
+        for (let moves = 0; moves < dist; moves++) {
+          moveNumber(direction);
+        }
+      }
+    }
+
     function move(e) {
       if (moveDirections[e.keyCode] && state.started) {
         e.preventDefault();
@@ -201,7 +220,7 @@ export default {
       }
     );
 
-    return { state, startedTime, start, stop };
+    return { state, startedTime, numberClick, start, stop };
   },
 };
 </script>
