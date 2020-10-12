@@ -135,11 +135,15 @@ export default {
 
       state.started = true;
       interval = setInterval(() => state.time++, 1000);
+
+      document.querySelector("#app").style.overflow = "hidden";
     }
 
     function stop() {
       state.started = false;
       clearInterval(interval);
+
+      document.querySelector("#app").style.overflow = "auto";
     }
 
     function moveNumber(code) {
